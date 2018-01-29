@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<title>Kanban Demo</title>
+		<script type="text/javascript" src="https://fb.me/react-15.2.0.js"></script>
+		<script type="text/javascript" src="https://fb.me/react-dom-15.2.0.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+		<style type="text/css">
+			h1 {
+				margin-bottom: 0px;
+			}
+			button {
+				cursor: pointer;
+				background: transparent;
+			}
+			.kanban-board {
+				float: left;
+				margin: 10px 20px;
+			}
+			.kanban-list {
+				padding: 0px;
+				list-style: none;
+			}
+			.kanban-item {
+				padding: 7px;
+				margin: 5px 0px;
+				border: 1px dashed gray;
+			}
+			.kanban-item input {
+				border: none;
+				padding: 3px;
+			}
+			.kanban-add {
+				padding: 3px 5px;
+				border: solid 1px gray;
+			}
+			.kanban-delete {
+				border: none;
+				font-size: 17px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Kanban Demo</h1>
+		<div id="react-kanban"></div>
+		<script type="text/babel">
+			
+			// カンバン 全体のコンポーネント
+			var Kanban = React.createClass({
+				getInitialState() {
+					return {
+						types: ["Todo", "Doing", "Done"]
+					};
+				},
+				render() {
+					return(
+						<div>
+							{this.state.types.map((type) =>
+								<KanbanBoard key={type} type={type} />
+							)}
+						</div>
+					);
+				}
+			});
+			
+			// カンバン 各ボードのコンポーネント
+			var KanbanBoard = React.createClass({
+				getInitialState() {
+					return {
+						count: 1,
+						children: [
+							{ id: 1, text: "" }
+						]
+					};
+				},
+				addItem() {
+					var children = this.state.children.concat({ id: ++this.state.count, text: "" });
+					this.setState({ children: children });
+				},
+				deleteItem(e) {
+					var children = this.state.children;
+					var index = e.target.getAttribute("data-index");
+					children.splice(index, 1);
+					if(children.length == 0) {
+						children.push({ id: ++this.state.count, text: "" });
+					}
+					this.setState({ children: children });
+				},
+				render() {
+					return(
+						<div className="kanban-board">
+							<h2>{this.props.type}</h2>
+							<ul className="kanban-list">
+								{this.state.children.map((child, index) =>
+									<KanbanItem key={child.id} index={index} deleteItem={this.deleteItem} />
+								)}
+							</ul>
+							<button type="button" className="kanban-add" onClick={this.addItem}>＋</button>
+						</div>
+					);
+				}
+			});
+			
+			// カンバン 各アイテムのコンポーネント
+			var KanbanItem = React.createClass({
+				getInitialState() {
+					return {
+						textValue: ""
+					};
+				},
+				onChange(e) {
+					this.setState({ textValue: e.target.value });
+				},
+				render() {
+					return(
+						<li className="kanban-item">
+							<input type="text" value={this.state.textValue} onChange={this.onChange} placeholder="New" />
+							<button type="button" className="kanban-delete" data-index={this.props.index} onClick={this.props.deleteItem}>×</button>
+						</li>
+					);
+				}
+			});
+			
+			ReactDOM.render(<Kanban />, document.getElementById("react-kanban"));
+			
+		</script>
+	</body>
+</html>
